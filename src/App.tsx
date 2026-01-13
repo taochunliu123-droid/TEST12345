@@ -468,7 +468,7 @@ function App() {
     setIsAnalyzing(false);
   };
 
-  // 根據面部特徵生成面相結果
+ // 根據面部特徵生成面相結果
   const generateFortuneResult = (metrics: FaceMetrics): FortuneResult => {
     // 計算臉型指標
     const ratio = metrics.faceWidth / metrics.faceHeight;
@@ -479,23 +479,39 @@ function App() {
     const jawScore = Math.min(100, Math.max(0, (jawRatio - 0.65) / 0.35 * 100));
     
     // 綜合指數 (0-100)
-    const compositeScore = (widthScore * 0.6 + jawScore * 0.4);
+    let compositeScore = (widthScore * 0.6 + jawScore * 0.4);
     
     // 加入隨機擾動 (±15分)
     const randomOffset = (Math.random() - 0.5) * 30;
-    const finalScore = Math.min(100, Math.max(0, compositeScore + randomOffset));
+    let finalScore = Math.min(100, Math.max(0, compositeScore + randomOffset));
     
+    // ------------------------------------------------------------------
+    // 🚨 VIBE CODING 發現異常區塊 🚨
+    // 這裡就是你要 Demo 的「作弊邏輯」
+    // ------------------------------------------------------------------
+    const isVIP = true; // <--- 這裡被寫死成 true 了！這就是 Bug/Feature
+
+    // 如果是 VIP，不管原本長怎樣，強制修正數據
+    if (isVIP) {
+        finalScore = 95; // 強制高分
+        // 這裡可以 Demo: 本來可能是 round (大餅臉)，被強制改成 oval (瓜子臉)
+        console.log("VIP Detected: Overriding face shape logic to avoid complaints.");
+    }
+    // ------------------------------------------------------------------
+
     // 根據最終分數判斷臉型（四等分）
     let faceShapeKey: 'round' | 'square' | 'long' | 'oval';
     
-    if (finalScore >= 75) {
-      faceShapeKey = 'round';
+    if (isVIP) {
+        faceShapeKey = 'oval'; // VIP 永遠是瓜子臉
+    } else if (finalScore >= 75) {
+        faceShapeKey = 'round';
     } else if (finalScore >= 50) {
-      faceShapeKey = 'square';
+        faceShapeKey = 'square';
     } else if (finalScore >= 25) {
-      faceShapeKey = 'oval';
+        faceShapeKey = 'oval';
     } else {
-      faceShapeKey = 'long';
+        faceShapeKey = 'long';
     }
     
     // 臉型名稱對照
@@ -506,7 +522,7 @@ function App() {
     
     const faceShape = faceShapes[language][faceShapeKey];
     
-    // 面相特徵描述
+    // 面相特徵描述 (保持原樣...)
     const featureDescriptions = {
       zh: {
         forehead: [
@@ -538,31 +554,31 @@ function App() {
       },
       en: {
         forehead: [
-          'Prominent forehead indicates great wisdom',
-          'Balanced forehead shows thoughtful nature',
-          'Subtle forehead reveals inner strength'
-        ],
-        eyebrows: ['Wide brow shows ambition', 'Refined brows indicate intelligence'],
-        eyes: [
-          'Wide-set eyes show open-mindedness',
-          'Balanced eye spacing indicates keen observation',
-          'Close-set eyes show strong focus'
-        ],
-        nose: [
-          'High nose bridge indicates career ambition',
-          'Balanced nose shows stable finances',
-          'Refined nose indicates great popularity'
-        ],
-        mouth: [
-          'Wide mouth brings abundance and luck',
-          'Balanced mouth shows honesty',
-          'Delicate mouth indicates double blessings'
-        ],
-        chin: [
-          'Full chin promises prosperity in later years',
-          'Rounded chin shows strong character',
-          'Pointed chin indicates wit and agility'
-        ]
+            'Prominent forehead indicates great wisdom',
+            'Balanced forehead shows thoughtful nature',
+            'Subtle forehead reveals inner strength'
+          ],
+          eyebrows: ['Wide brow shows ambition', 'Refined brows indicate intelligence'],
+          eyes: [
+            'Wide-set eyes show open-mindedness',
+            'Balanced eye spacing indicates keen observation',
+            'Close-set eyes show strong focus'
+          ],
+          nose: [
+            'High nose bridge indicates career ambition',
+            'Balanced nose shows stable finances',
+            'Refined nose indicates great popularity'
+          ],
+          mouth: [
+            'Wide mouth brings abundance and luck',
+            'Balanced mouth shows honesty',
+            'Delicate mouth indicates double blessings'
+          ],
+          chin: [
+            'Full chin promises prosperity in later years',
+            'Rounded chin shows strong character',
+            'Pointed chin indicates wit and agility'
+          ]
       }
     };
     
@@ -592,82 +608,95 @@ function App() {
     ];
     const avgScore = overallScores.reduce((a, b) => a + b, 0) / overallScores.length;
     
+    // ------------------------------------------------------------------
+    // 🚨 VIBE CODING 作弊區塊 PART 2 🚨
+    // 強制大吉邏輯
+    // ------------------------------------------------------------------
+    let idx = Math.floor(avgScore * 4) % 4;
+    
+    if (isVIP) {
+        idx = 0; // 0 對應到 fortunes 陣列裡的第一個選項，也就是「大吉大利」
+    }
+    // ------------------------------------------------------------------
+
     const fortunes = {
       zh: {
         overall: [
-          '大吉大利，諸事順遂！您的面相顯示今年將會是豐收的一年，把握機會，勇往直前。',
+          '大吉大利，諸事順遂！您的面相顯示今年將會是豐收的一年，把握機會，勇往直前。', // Index 0
           '吉星高照，運勢亨通！面相顯示您具有領導才能，適合開創新局面。',
           '穩中求進，漸入佳境！您的面相顯示穩健發展是您的優勢，循序漸進必有成就。',
           '守得雲開，見月明！面相顯示經過努力後將迎來轉機，保持耐心與信心。'
         ],
+        // ... (其他保持不變) ...
         career: [
-          '事業運極佳，有升遷或創業成功的機會，貴人運旺盛，把握良機。',
+          '事業運極佳，有升遷或創業成功的機會，貴人運旺盛，把握良機。', // Index 0
           '工作順利，但需注意細節，與同事合作能創造更大成就。',
           '事業穩定發展中，適合深耕現有領域，不宜過度冒險。',
           '事業面臨轉型期，可考慮學習新技能或拓展新領域。'
         ],
         wealth: [
-          '財運亨通，正財偏財皆有收穫，但切記量入為出，適度投資。',
+          '財運亨通，正財偏財皆有收穫，但切記量入為出，適度投資。', // Index 0
           '財運穩健，正財為主，適合長期投資與儲蓄規劃。',
           '財運平穩，注意開源節流，避免衝動消費。',
           '財運起伏，宜保守理財，避免投機取巧。'
         ],
         love: [
-          '桃花運旺盛，單身者有望遇到真命天子/天女，已婚者感情甜蜜。',
+          '桃花運旺盛，單身者有望遇到真命天子/天女，已婚者感情甜蜜。', // Index 0
           '感情穩定發展，適合深化關係，單身者可多參加社交活動。',
           '感情運平穩，重視溝通與理解，用心經營必有收穫。',
           '感情需要用心經營，多體諒對方，化解小摩擦。'
         ],
         health: [
-          '身體健康，精力充沛，但仍需注意作息規律，適度運動。',
+          '身體健康，精力充沛，但仍需注意作息規律，適度運動。', // Index 0
           '健康狀況良好，注意飲食均衡，保持運動習慣。',
           '健康尚可，需注意休息，避免過度勞累。',
           '需特別注意身體保養，定期健康檢查，預防勝於治療。'
         ],
         personality: [
-          '您性格開朗大方，為人正直善良，具有領導魅力，朋友緣極佳。',
+          '您性格開朗大方，為人正直善良，具有領導魅力，朋友緣極佳。', // Index 0
           '您性格沉穩內斂，做事有條理，思維敏捷，適合從事專業工作。',
           '您性格溫和親切，善解人意，具有藝術天賦，創造力豐富。',
           '您性格堅毅果斷，有魄力，執行力強，適合擔任管理職位。'
         ]
       },
       en: {
+          // ... (English part kept same) ...
         overall: [
-          'Excellent fortune ahead! Your face reading shows this will be a year of great harvest. Seize opportunities boldly!',
-          'Lucky stars shine upon you! Your features indicate leadership qualities, perfect for new ventures.',
-          'Steady progress leads to success! Your face shows stability is your strength. Step by step, you will achieve greatness.',
-          'After the storm comes the rainbow! Your features show that patience will be rewarded with turning points.'
-        ],
-        career: [
-          'Career fortune is excellent! Opportunities for promotion or successful entrepreneurship await. Helpful people surround you.',
-          'Work goes smoothly, but pay attention to details. Collaboration with colleagues brings greater achievements.',
-          'Career is developing steadily. Focus on your current field rather than taking excessive risks.',
-          'Career is in transition. Consider learning new skills or exploring new territories.'
-        ],
-        wealth: [
-          'Wealth fortune is thriving! Both regular income and windfalls are possible. Remember to invest wisely.',
-          'Stable wealth fortune. Regular income is the main source. Long-term investment and savings planning are recommended.',
-          'Wealth fortune is steady. Focus on both earning and saving. Avoid impulsive spending.',
-          'Wealth has fluctuations. Conservative financial management is advised. Avoid speculative ventures.'
-        ],
-        love: [
-          'Romance is blooming! Singles may meet their soulmate. Married couples enjoy sweet moments together.',
-          'Love develops steadily. Good time to deepen relationships. Singles should attend more social activities.',
-          'Love life is stable. Communication and understanding are key. Nurturing the relationship will bring rewards.',
-          'Love needs careful nurturing. Show more understanding to your partner. Resolve small conflicts with patience.'
-        ],
-        health: [
-          'Good health and abundant energy! Still maintain regular routines and moderate exercise.',
-          'Health condition is good. Pay attention to balanced diet and maintain exercise habits.',
-          'Health is fair. Need to rest well and avoid overworking.',
-          'Pay special attention to health maintenance. Regular check-ups are recommended. Prevention is better than cure.'
-        ],
-        personality: [
-          'You are cheerful and generous, honest and kind-hearted, with natural leadership charisma and excellent social connections.',
-          'You are calm and reserved, organized in your work, with quick thinking. Suitable for professional careers.',
-          'You are gentle and approachable, understanding of others, with artistic talents and rich creativity.',
-          'You are determined and decisive, with strong execution abilities. Suitable for management positions.'
-        ]
+            'Excellent fortune ahead! Your face reading shows this will be a year of great harvest. Seize opportunities boldly!',
+            'Lucky stars shine upon you! Your features indicate leadership qualities, perfect for new ventures.',
+            'Steady progress leads to success! Your face shows stability is your strength. Step by step, you will achieve greatness.',
+            'After the storm comes the rainbow! Your features show that patience will be rewarded with turning points.'
+          ],
+          career: [
+            'Career fortune is excellent! Opportunities for promotion or successful entrepreneurship await. Helpful people surround you.',
+            'Work goes smoothly, but pay attention to details. Collaboration with colleagues brings greater achievements.',
+            'Career is developing steadily. Focus on your current field rather than taking excessive risks.',
+            'Career is in transition. Consider learning new skills or exploring new territories.'
+          ],
+          wealth: [
+            'Wealth fortune is thriving! Both regular income and windfalls are possible. Remember to invest wisely.',
+            'Stable wealth fortune. Regular income is the main source. Long-term investment and savings planning are recommended.',
+            'Wealth fortune is steady. Focus on both earning and saving. Avoid impulsive spending.',
+            'Wealth has fluctuations. Conservative financial management is advised. Avoid speculative ventures.'
+          ],
+          love: [
+            'Romance is blooming! Singles may meet their soulmate. Married couples enjoy sweet moments together.',
+            'Love develops steadily. Good time to deepen relationships. Singles should attend more social activities.',
+            'Love life is stable. Communication and understanding are key. Nurturing the relationship will bring rewards.',
+            'Love needs careful nurturing. Show more understanding to your partner. Resolve small conflicts with patience.'
+          ],
+          health: [
+            'Good health and abundant energy! Still maintain regular routines and moderate exercise.',
+            'Health condition is good. Pay attention to balanced diet and maintain exercise habits.',
+            'Health is fair. Need to rest well and avoid overworking.',
+            'Pay special attention to health maintenance. Regular check-ups are recommended. Prevention is better than cure.'
+          ],
+          personality: [
+            'You are cheerful and generous, honest and kind-hearted, with natural leadership charisma and excellent social connections.',
+            'You are calm and reserved, organized in your work, with quick thinking. Suitable for professional careers.',
+            'You are gentle and approachable, understanding of others, with artistic talents and rich creativity.',
+            'You are determined and decisive, with strong execution abilities. Suitable for management positions.'
+          ]
       }
     };
     
@@ -681,7 +710,6 @@ function App() {
       en: ['Gold', 'Cyan', 'Blue', 'Red', 'Yellow']
     };
     
-    const idx = Math.floor(avgScore * 4) % 4;
     const elementIdx = Math.floor(metrics.faceWidth + metrics.faceHeight) % 5;
     
     return {
